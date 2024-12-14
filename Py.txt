@@ -1,0 +1,9 @@
+Download and install python
+1. Download Python
+2. Installed Python
+3. Download VS Code | light weight, Free , C#, Java
+4. Install VS Code
+5. Close welcome screen
+6. Click Extension Manager ( search Python> Install that plugins)
+7. CLick Explorer, Open Folder: Select any Folder where u want to keep ur code
+

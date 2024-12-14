@@ -1,0 +1,138 @@
+package com.example;
+import java.util.ArrayList;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
+
+public class Guru99_Payment_Gateway {
+
+	static WebDriver  driver = null;	
+	public static void main(String[] args) throws InterruptedException {
+		
+		Initialization("https://demo.guru99.com/payment-gateway/purchasetoy.php");
+		Thread.sleep(2000);
+		ArrayList list = GetSomeTestData();
+
+		for(int i=0;i<2;i++)
+		{
+			PaymentData obj = (PaymentData)list.get(i);
+			Boolean test_status =  TestPassOrFailed(obj);
+			if(obj.ValidData && test_status)
+			{
+				System.out.print("Test Case Passed");
+			}
+			if(obj.ValidData ==  false && test_status== false)
+			{
+				System.out.print("Test Case Passed");
+			}
+			System.out.print("Test Done for one time");
+		}
+		driver.close();		
+	}
+	
+	private static boolean TestPassOrFailed(PaymentData obj) {
+		boolean TITLE_OK = CheckTitle("Guru99 Payment Gateway");
+		if(TITLE_OK)
+		{
+			SelectQuantity(obj.Quantity);	//???	
+			SubmitForm(obj.CardNumber,obj.ExpMonth,obj.ExpYear,obj.CCV);					
+			if(ValidateFromURL() == true && ValidateFromPageText() == true)
+			{			
+				PrintSuccessful();
+				return true;
+			}							
+		}	
+		return false;	
+	}
+
+	private static ArrayList GetSomeTestData() {
+		ArrayList list = new ArrayList<PaymentData>();
+		list.add(new PaymentData(true,"3","1234567890123456","12","2017","123"));
+		list.add(new PaymentData(false,"3","12121212","12","2017","123"));
+		return list;
+	}
+
+	private static void Initialization(String string) {
+		driver =new ChromeDriver();
+		driver.manage().window().maximize();		
+		driver.get(string);		
+	}
+
+	private static boolean CheckTitle(String Expected_Title) {
+		
+		String Actual_Title =  driver.getTitle();
+		if (Expected_Title.equals(Actual_Title)) 
+		{		    
+			return true;
+		}
+		else 
+		{
+			PrintUnsuccessful();
+			return false;
+		}
+	}
+
+	private static boolean ValidateFromURL() {
+		boolean  p = driver.findElement(By.xpath("//*[@id=\"three\"]/div/header/h2")).isDisplayed();
+		return p;
+	}
+
+	private static boolean ValidateFromPageText() {
+		
+		String Actual_Text= driver.findElement(By.xpath("//h2[normalize-space()='Payment successfull!']")).getText();
+		System.out.println(Actual_Text);
+		String Expected_Text= "Payment successfull!";		
+		if (Actual_Text.equalsIgnoreCase(Expected_Text)) 
+		{
+			System.out.println("Payment Accepted:"+ "Pass");
+			return true;
+		}
+		return false;
+	}
+	
+	private static void SubmitForm(String card,String month,String year,String ccv) 
+	{
+		WebElement cardNumber=driver.findElement(By.id("card_nmuber"));
+		cardNumber.sendKeys(card);
+
+		WebElement expMonth=driver.findElement(By.id("month"));
+		Select monthDropdown=new Select(expMonth);
+		monthDropdown.selectByVisibleText(month);
+		       
+
+		WebElement expYear=driver.findElement(By.id("year"));
+		Select yearDropdown=new Select(expYear);
+		yearDropdown.selectByVisibleText(year);
+		       
+
+		WebElement cvvCode=driver.findElement(By.id("cvv_code"));
+		cvvCode.sendKeys(ccv);		        
+
+		WebElement payBtn=driver.findElement(By.name("submit"));
+		payBtn.click();
+	}
+	
+	private static void SelectQuantity(String monthValue)
+	{
+		WebElement HTML_SELECT_ELEMENT = driver.findElement(By.xpath("//*[@id=\"three\"]/div/form/div/div[4]/select"));
+		Select objSelect = new Select(HTML_SELECT_ELEMENT);
+		objSelect.selectByValue(monthValue);
+		driver.findElement(By.xpath("//input[@value='Buy Now']")).click();
+		System.out.println("Sussecfully Enter to the Expected URL");			
+	}
+
+	private static void PrintUnsuccessful() {
+		System.out.println("Unsuccessful");
+	}
+
+	static void PrintSuccessful() 
+	{
+		System.out.println("Congratlation");
+	}
+	
+	
+	
+}
